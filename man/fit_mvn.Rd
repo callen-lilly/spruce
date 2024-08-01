@@ -4,12 +4,14 @@
 \alias{fit_mvn}
 \title{Multivariate normal mixture model clustering}
 \usage{
-fit_mvn(Y, K, nsim = 2000, burn = 1000, z_init = NULL)
+fit_mvn(Y, K, Mu0 = NULL, nsim = 2000, burn = 1000, z_init = NULL)
 }
 \arguments{
 \item{Y}{An n x g matrix of gene expression values. n is the number of cell spots and g is the number of features.}
 
 \item{K}{The number of mixture components to fit.}
+
+\item{Mu0}{A list of length K containing the prior means (length g vector) for each mixture component}
 
 \item{nsim}{Number of total MCMC iterations to run.}
 
