@@ -4,6 +4,7 @@
 #'
 #' @param Y An n x g matrix of gene expression values. n is the number of cell spots and g is the number of features.
 #' @param K The number of mixture components to fit. 
+#' @param Mu0 A list of length K containing the prior means (length g vector) for each mixture component
 #' @param nsim Number of total MCMC iterations to run.
 #' @param burn Number of MCMC iterations to discard as burn in. The number of saved samples is nsim - burn.
 #' @param z_init Optional initialized allocation vector. Randomly initialized if NULL. 
@@ -51,6 +52,7 @@
 
 fit_mvn <- function(Y,
                     K,
+                    Mu0 = NULL,
                     nsim = 2000,
                     burn = 1000,
                     z_init = NULL)
@@ -72,7 +74,11 @@ fit_mvn <- function(Y,
   }
   
   # priors - shared across clusters
-  mu0 <- colMeans(Y)
+  if(is.null(Mu0))
+  {
+    mu0 <- colMeans(Y)
+    Mu0 <- replicate(K, mu0, simplify = FALSE)
+  }
   L0 <- S0 <- diag(p)
   nu0 <- 2
   a0 <- rep(4,K) # prior parameter vector for pi1,...,piK
@@ -116,7 +122,7 @@ fit_mvn <- function(Y,
       
       ### update mu - cluster specific
       Ln[[k]] <- solve(solve(L0) + nk*solve(Sigma[[k]]))
-      mn[[k]] <- Ln[[k]] %*% (solve(L0) %*% mu0 + nk*solve(Sigma[[k]]) %*% Ybar[[k]]) 
+      mn[[k]] <- Ln[[k]] %*% (solve(L0) %*% Mu0[[k]] + nk*solve(Sigma[[k]]) %*% Ybar[[k]]) 
       mun[[k]] <- mvrnormArma(1 ,mn[[k]],Ln[[k]])
       
       ### update Sigma - cluster specific 
